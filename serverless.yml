@@ -1,0 +1,73 @@
+
+service: serverless-todotwo-rest-api
+
+frameworkVersion: '3'
+plugins:
+  - serverless-offline
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - arn:aws:dynamodb:us-east-1:348979917602:table/todos
+resources:
+  Resources:
+    TodosTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: 'todos'
+functions:
+  create:
+    handler: src/handler/createTodo.createTodo
+    events:
+      - http:
+          path: createData
+          method: post
+          cors: true
+  list:
+    handler: src/handler/listTodo.listTodo
+    events:
+      - http:
+          path: getData
+          method: get
+          cors: true
+  update:
+    handler: src/handler/updateTodo.updateTodo
+    events:
+      - http:
+          path: updateData/{id}
+          method: put
+          cors: true
+  delete:
+    handler: src/handler/deleteTodo.deleteTodo
+    events:
+      - http:
+          path: deleteData/{id}
+          method: delete
+          cors: true
+  get:
+    handler: src/handler/getTodo.getTodo
+    events:
+      - http:
+          path: getDataById/{id}
+          method: get
+          cors: true
